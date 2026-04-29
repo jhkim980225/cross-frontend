@@ -14,7 +14,9 @@ export const QueryProvider = ({ children }: Props) => {
         defaultOptions: {
           queries: {
             staleTime: 60 * 1000,
+            gcTime: 5 * 60 * 1000,
             refetchOnWindowFocus: false,
+            retry: 1, // 기본 3회 재시도 → 1회로 축소
           },
         },
       }),

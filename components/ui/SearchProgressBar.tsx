@@ -47,13 +47,13 @@ export const SearchProgressBar = ({ isLoading }: Props) => {
         <span className="text-sm text-gray-600 dark:text-gray-400">
           검색 중...
         </span>
-        <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
           {Math.round(progress)}%
         </span>
       </div>
       <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
         <div
-          className="h-full bg-blue-600 rounded-full transition-all duration-150 ease-out"
+          className="h-full bg-gray-900 dark:bg-white rounded-full transition-all duration-150 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>

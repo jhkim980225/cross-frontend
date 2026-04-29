@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useDeferredValue } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search, X } from "lucide-react";
 import { fetchBrands } from "@/lib/api";
@@ -16,11 +16,16 @@ export const BrandFilter = ({ currentBrandId, onChange }: Props) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { data: brands = [] } = useQuery<Brand[]>({
-    queryKey: ["brands", query],
-    queryFn: () => fetchBrands(query || undefined),
-    staleTime: 60_000,
+  // 키 입력마다 API 호출 방지 - React가 렌더링 우선순위 낮게 처리
+  const deferredQuery = useDeferredValue(query);
+
+  const { data: rawBrands } = useQuery<Brand[]>({
+    queryKey: ["brands", deferredQuery],
+    queryFn: () => fetchBrands(deferredQuery || undefined),
+    staleTime: 5 * 60_000, // 5분 캐시
+    gcTime: 10 * 60_000,
   });
+  const brands: Brand[] = Array.isArray(rawBrands) ? rawBrands : [];
 
   const selectedBrand = brands.find((b) => b.id === currentBrandId);
 
@@ -50,7 +55,7 @@ export const BrandFilter = ({ currentBrandId, onChange }: Props) => {
       <span className="text-sm font-medium text-gray-600 dark:text-gray-400 mr-1">브랜드</span>
 
       {currentBrandId && selectedBrand ? (
-        <span className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full border border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-400">
+        <span className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full border border-gray-900 bg-gray-900 text-white dark:border-white dark:bg-white dark:text-gray-900">
           {selectedBrand.nameKo ?? selectedBrand.name}
           <button onClick={handleClear} aria-label="브랜드 선택 해제">
             <X className="w-3 h-3" />
@@ -59,7 +64,7 @@ export const BrandFilter = ({ currentBrandId, onChange }: Props) => {
       ) : null}
 
       <div ref={containerRef} className="relative">
-        <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+        <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-gray-400">
           <Search className="w-3.5 h-3.5 text-gray-400 ml-2.5" />
           <input
             type="text"
@@ -82,7 +87,7 @@ export const BrandFilter = ({ currentBrandId, onChange }: Props) => {
                   onClick={() => handleSelect(brand)}
                   className={`w-full text-left text-xs px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
                     brand.id === currentBrandId
-                      ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                      ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
                       : "text-gray-700 dark:text-gray-300"
                   }`}
                 >

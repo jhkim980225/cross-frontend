@@ -1,9 +1,12 @@
+export const dynamic = "force-dynamic";
+
 import { Suspense } from "react";
 import type { Platform, SortOption, Category } from "@/lib/types";
 import { MVP_PLATFORMS, CATEGORIES } from "@/lib/constants";
 import { SearchBar } from "@/components/search/SearchBar";
 import { SearchFilter } from "@/components/search/SearchFilter";
 import { ProductList } from "@/components/product/ProductList";
+import { CompareBanner } from "@/components/product/CompareBanner";
 
 type Props = {
   searchParams: {
@@ -28,21 +31,28 @@ export default function SearchPage({ searchParams }: Props) {
   const category: Category = CATEGORIES.some((c) => c.value === searchParams.category)
     ? (searchParams.category as Category)
     : "all";
-  const minPrice = searchParams.minPrice ? Number(searchParams.minPrice) : undefined;
-  const maxPrice = searchParams.maxPrice ? Number(searchParams.maxPrice) : undefined;
+  const minPrice = searchParams.minPrice !== undefined ? Number(searchParams.minPrice) : undefined;
+  const maxPrice = searchParams.maxPrice !== undefined ? Number(searchParams.maxPrice) : undefined;
   const brandId = searchParams.brandId;
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-6">
       <div className="flex justify-center mb-6">
-        <SearchBar initialValue={keyword} />
+        <Suspense fallback={null}>
+          <SearchBar
+            initialValue={keyword}
+            currentParamsStr={new URLSearchParams(
+              Object.entries(searchParams).flatMap(([k, v]) =>
+                Array.isArray(v) ? v.map((val) => [k, val]) : v ? [[k, v]] : []
+              )
+            ).toString()}
+          />
+        </Suspense>
       </div>
 
       <Suspense fallback={null}>
         <SearchFilter
           currentPlatforms={platforms}
-          currentSort={sort}
-          currentCategory={category}
           currentMinPrice={minPrice}
           currentMaxPrice={maxPrice}
           currentBrandId={brandId}
@@ -50,6 +60,7 @@ export default function SearchPage({ searchParams }: Props) {
       </Suspense>
 
       <div className="mt-6">
+        {keyword && <CompareBanner keyword={keyword} />}
         <ProductList
           keyword={keyword}
           platforms={platforms}

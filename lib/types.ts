@@ -1,4 +1,4 @@
-export type Platform = "bungae" | "danggeun" | "joonggonara" | "helloumarket" | "vinted";
+export type Platform = "bungae" | "danggeun" | "joonggonara" | "hellomarket" | "vinted";
 
 export type ProductCondition = "new" | "like_new" | "good" | "fair";
 
@@ -40,12 +40,8 @@ export interface SearchFilters {
 
 export type Category =
   | "all"
-  | "outer"
-  | "top"
-  | "bottom"
-  | "dress"
-  | "shoes"
-  | "bag"
-  | "accessory";
+  | "outer" | "top" | "bottom" | "dress"
+  | "shoes" | "bag" | "accessory"
+  | "sofa" | "bed" | "desk" | "storage" | "lighting";
 
-export type SortOption = "price_asc" | "latest" | "seller_score";
+export type SortOption = "price_asc" | "price_desc" | "newest" | "latest" | "seller_score";

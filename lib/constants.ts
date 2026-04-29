@@ -1,32 +1,57 @@
 import type { Platform, SortOption, Category } from "@/lib/types";
 
-export const PLATFORM_META: Record<Platform, { label: string; color: string }> = {
-  bungae:       { label: "번개장터", color: "bg-yellow-100 text-yellow-800" },
-  danggeun:     { label: "당근마켓", color: "bg-orange-100 text-orange-800" },
-  joonggonara:  { label: "중고나라", color: "bg-red-100 text-red-800" },
-  helloumarket: { label: "헬로마켓", color: "bg-blue-100 text-blue-800" },
-  vinted:       { label: "Vinted",   color: "bg-teal-100 text-teal-800" },
+export type CategoryLeaf  = { value: Category; label: string };
+export type CategoryGroup = { group: string; label: string; children: CategoryLeaf[] };
+export type CategoryNode  = CategoryLeaf | CategoryGroup;
+export function isCategoryGroup(n: CategoryNode): n is CategoryGroup {
+  return "group" in n;
+}
+
+export const PLATFORM_META: Record<Platform, { label: string; bg: string; text: string }> = {
+  bungae:      { label: "번개장터", bg: "#FF6B2C", text: "#fff" },
+  danggeun:    { label: "당근마켓", bg: "#1DBE6B", text: "#fff" },
+  joonggonara: { label: "중고나라", bg: "#3478F6", text: "#fff" },
+  hellomarket: { label: "헬로마켓", bg: "#6B7280", text: "#fff" },
+  vinted:      { label: "Vinted",   bg: "#7B61FF", text: "#fff" },
 };
 
-export const ALL_PLATFORMS: Platform[] = ["bungae", "danggeun", "joonggonara", "helloumarket", "vinted"];
+export const ALL_PLATFORMS: Platform[] = ["bungae", "danggeun", "joonggonara", "hellomarket", "vinted"];
 
-export const MVP_PLATFORMS: Platform[] = ["bungae", "danggeun"];
+export const MVP_PLATFORMS: Platform[] = ["bungae", "danggeun", "joonggonara", "vinted"];
 
 export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: "price_asc", label: "최저가순" },
   { value: "latest", label: "최신순" },
+  { value: "price_asc", label: "최저가순" },
+  { value: "price_desc", label: "최고가순" },
   { value: "seller_score", label: "판매자 평점순" },
 ];
 
-export const CATEGORIES: { value: Category; label: string }[] = [
+export const CATEGORY_TREE: CategoryNode[] = [
   { value: "all", label: "전체" },
-  { value: "outer", label: "아우터" },
-  { value: "top", label: "상의" },
-  { value: "bottom", label: "하의" },
-  { value: "dress", label: "원피스" },
-  { value: "shoes", label: "신발" },
-  { value: "bag", label: "가방" },
+  { group: "clothing", label: "의류", children: [
+    { value: "outer",  label: "아우터" },
+    { value: "top",    label: "상의"   },
+    { value: "bottom", label: "하의"   },
+    { value: "dress",  label: "원피스" },
+  ]},
+  { value: "shoes",     label: "신발"     },
+  { value: "bag",       label: "가방"     },
   { value: "accessory", label: "액세서리" },
+  { group: "furniture", label: "가구/인테리어", children: [
+    { value: "sofa",    label: "소파"     },
+    { value: "bed",     label: "침대"     },
+    { value: "desk",    label: "책상/의자" },
+    { value: "storage", label: "수납/정리" },
+    { value: "lighting",label: "조명"     },
+  ]},
+];
+
+// 기존 CATEGORIES → 트리에서 플랫화 (API 검증·하위 호환)
+export const CATEGORIES: CategoryLeaf[] = [
+  { value: "all", label: "전체" },
+  ...CATEGORY_TREE.flatMap((n) =>
+    isCategoryGroup(n) ? n.children : (n as CategoryLeaf).value !== "all" ? [n as CategoryLeaf] : []
+  ),
 ];
 
 export const PRICE_PRESETS: { label: string; min?: number; max?: number }[] = [
